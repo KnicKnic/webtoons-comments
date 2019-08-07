@@ -95,7 +95,55 @@ const getComment = async url =>{
   let data = await response.text();
   var remove_function = data.substr(2,data.length - 4)
   var results = JSON.parse(remove_function)
-  console.log(remove_function)
+  console.log(results)
+  return results
+}
+
+
+function GetCurrentTime(){
+  return Date.now()
+}
+
+// docker run --name mongodb -v mongodata:/data/db -d -p 27017:27017 mongo
+
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+ 
+// Connection URL
+const mongoUrl = 'mongodb://localhost:27017';
+// console.log(Date.now())
+const dbName = 'testProject';
+async function main(){
+
+  let client, db;
+  try{
+    var comments = await getComment(urls[1])
+    for(x of comments.result.commentList){
+      x._id = x.commentNo
+      x.insertTime = GetCurrentTime()
+    }
+     client = await MongoClient.connect(mongoUrl, {useNewUrlParser: true});
+     db = client.db(dbName);
+     const collection = db.collection('t1');
+     collection.ensureIndex([["insertTime", -1], ["commentNo", -1]])
+     // Insert some documents
+     var res = await collection.insertMany(comments.result.commentList);
+     console.log(res)
+
+     var found = await collection.find().sort( [["insertTime", -1], ["commentNo", -1]]).limit(10).toArray()
+     console.log(found)
+    //  let dCollection = db.collection('collectionName');
+    //  let result = await dCollection.find();   
+    //  // let result = await dCollection.countDocuments();
+    //  // your other codes ....
+    //  return result.toArray();
+  }
+  catch(err){ console.error(err); } // catch any mongo error here
+  finally{ client.close(); } // make sure to close your connection after
+
 
 }
-getComment(urls[0])
+
+main()
+
+ 

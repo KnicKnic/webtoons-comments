@@ -32,3 +32,7 @@ To get list of episodes, need to scrape webpage.
 What we do is `https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=12` start at page 1 and increase until no new comics are found.
 
 need to find easy javascript html scraping library.
+
+
+loading a comment reply
+Invoke-WebRequest -Uri "https://global.apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=webtoon&templateId=default_new&pool=cbox&_callback=jQuery17046051372282569436_1565219908479&lang=en&country=&objectId=c_117474_116&categoryId=&pageSize=10&indexSize=10&groupId=&listType=OBJECT&pageType=default&token=null&consumerKey=BiqLr39tq3iAWWxuiOXg&snsCode=null&parentCommentNo=91600052&page=1&userType=&_=1565219930232" -Headers @{"Sec-Fetch-Mode"="no-cors"; "Referer"="https://www.webtoons.com/en/challenge/i-wish-i-were-you/chapter-81/viewer?title_no=117474&episode_no=116"; "User-Agent"="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36"}
