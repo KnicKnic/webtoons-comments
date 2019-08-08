@@ -88,13 +88,48 @@ function makeCommentUrl(url){
   return "https://global.apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=webtoon&templateId=default_new&pool=cbox&_callback=a&lang=en&country=&objectId=c_"  + title + '_' + episode +'&categoryId=&pageSize=30&indexSize=30&groupId=&listType=OBJECT&pageType=default&token=null&consumerKey=BasdOXg&snsCode=null&page=1&initialize=true&userType=&useAltSort=true&replyPageSize=30&sort=favorite&_=156493'
 }
 
+// keep going until .result.pageModel.nextPage == 0
+function* GenerateCommentUrls(episodeUrl){
+  
+  const {title, episode} = parseTitleEpisode(episodeUrl)
+  let firstPage = "https://global.apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=webtoon&templateId=default_new&pool=cbox&_callback=a&lang=en&country=&objectId=c_"  + title + '_' + episode +'&categoryId=&pageSize=30&indexSize=30&groupId=&listType=OBJECT&pageType=default&token=null&consumerKey=BasdOXg&snsCode=null&page=1&initialize=true&userType=&useAltSort=true&replyPageSize=30&sort=favorite&_=156493'
+  yield firstPage
+  for(let currentPage=2;;currentPage++){
+    let changeUrl = new URL(firstPage);
+    changeUrl.searchParams.delete("initialize")
+    changeUrl.searchParams.delete("userType")
+    changeUrl.searchParams.delete("useAltSort")
+    changeUrl.searchParams.delete("replyPageSize")
+    changeUrl.searchParams.set("page", currentPage)
+    changeUrl.searchParams.set("refresh", "false")
+    yield changeUrl.href
+  }
+}
+
 const getComment = async url =>{
   const commentUrl  = makeCommentUrl(url)
   
-  const response = await fetch(commentUrl, {headers: {"Referer":"https://www.webtoons.com", "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"}});
+let changeUrl = new URL(commentUrl);
+changeUrl.searchParams.delete("initialize")
+changeUrl.searchParams.delete("userType")
+changeUrl.searchParams.delete("useAltSort")
+changeUrl.searchParams.delete("replyPageSize")
+changeUrl.searchParams.set("page", 2)
+changeUrl.searchParams.set("refresh", "false")
+
+console.log(changeUrl.href)
+changeUrl = commentUrl
+
+// result.pageModel.nextPage
+// != 
+// result.pageModel.lastPage
+
+  const response = await fetch(changeUrl, {headers: {"Referer":"https://www.webtoons.com", "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"}});
   let data = await response.text();
   var remove_function = data.substr(2,data.length - 4)
   var results = JSON.parse(remove_function)
+  // assert results.success == "true"
+
   console.log(results)
   return results
 }
@@ -109,6 +144,82 @@ function GetCurrentTime(){
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
  
+
+
+async function GetComments(episodeUrl){
+  
+  let comments = []
+  for(commentPage of GenerateCommentUrls(episodeUrl)){
+    const response = await fetch(commentPage, {headers: {"Referer":"https://www.webtoons.com", "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"}});
+    let data = await response.text();
+    var remove_function = data.substr(2,data.length - 4)
+    var results = JSON.parse(remove_function)
+    comments.push(...results.result.bestList)
+    comments.push(...results.result.commentList)
+    if(results.result.pageModel.nextPage == "0"){
+      break;
+    }
+  }
+  return comments;
+}
+// GetComments(urls[1])
+
+async function Update(episodeUrl){
+
+  let client, db;
+
+  try{
+     client = await MongoClient.connect(mongoUrl, {useNewUrlParser: true});
+     db = client.db(dbName);
+     const collection = db.collection('t1');
+     collection.ensureIndex([["insertTime", -1], ["commentNo", -1]])
+     
+      comments = await GetComments(episodeUrl)
+      for(let comment of comments){
+          
+        comment._id = comment.commentNo
+        comment.insertTime = GetCurrentTime()
+
+        var replyCount = comment.replyCount
+        comment.replyCount = 0
+        var found = await collection.find({_id: comment.commentNo }).toArray()
+        if(found.length == 0){
+          var res = await collection.insertOne(comment);
+        }
+        else if(found[0].replyCount != replyCount){
+          comment.replyCount = 0;
+          await collection.updateOne({ _id: comment.commentNo }, { $set: { replyCount: 0 } })
+        }
+        else{
+          console.log("DB already had ", comment)
+          continue;
+        }
+        add code to insert replies
+        // insert comments
+        if(replyCount != 0){          
+          await collection.updateOne({ _id: comment.commentNo }, { $set: { replyCount: replyCount } })
+        }
+      }
+
+    //  let dCollection = db.collection('collectionName');
+    //  let result = await dCollection.find();   
+    //  // let result = await dCollection.countDocuments();
+    //  // your other codes ....
+    //  return result.toArray();
+  }
+  catch(err){ console.error(err); } // catch any mongo error here
+  finally{ client.close(); } // make sure to close your connection after
+
+}
+// get comments generator
+// check if it exists in DB
+// for each comment add a time
+// set reply count to 0
+// add to DB
+// load Replies
+// write replies to DB
+// update original to contain count of replies
+
 // Connection URL
 const mongoUrl = 'mongodb://localhost:27017';
 // console.log(Date.now())
@@ -144,6 +255,6 @@ async function main(){
 
 }
 
-main()
-
+// main()
+Update(urls[1])
  
