@@ -3,6 +3,8 @@ generate RSS of webtoons comments and play with mongodb
 
 # TODO
 
+Completed items
+
 * get list of chapters in comic
 * get list of comments in comic
     * I think I need to grab replies in comic
@@ -10,6 +12,11 @@ generate RSS of webtoons comments and play with mongodb
 * load results into database
 * show results in database based on time processed
     * last 50 inserted into database
+
+
+* grab Image for page & put url into db
+* generate list with images
+* generate content that includes replied post in results
 * periodically rescrape results
 * create docker-compose for results
 

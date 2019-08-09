@@ -59,6 +59,15 @@ async function GenerateFeed(){
        var posts = await collection.find().sort( [["insertTime", -1], ["commentNo", -1]]).limit(100).toArray()
     //    console.log(posts)
 
+        generateContent = async function(post){
+            let contents = "User: " + post.userName + "<br>Post: " + post.contents
+            if(post.commentNo != post.parentCommentNo){
+                let parent = (await collection.find({_id: post.parentCommentNo}).toArray())[0]
+                contents += "<br>Parent User: " + parent.userName + "<br>Parent Post: " + parent.contents
+            }
+            return contents
+        }
+
             
         for( post of posts){
             feed.addItem({
@@ -67,7 +76,7 @@ async function GenerateFeed(){
             link: GetPostUrl(post.objectId),
             // description: post.contents,
             description: post.userName,
-            content: "User: " + post.userName + "<br>Post: " + post.contents,
+            content: await generateContent(post),
             author: [
                 {
                 name: post.userName 

@@ -19,14 +19,22 @@ async function findComicUrls(url){
   const response = await fetch(url);
   const html = await response.text();
   const $ = cheerio.load(html);
-  let items = $('[data-episode-no]')
+  let items = $('li[data-episode-no]')
+  // type tag, name li
 
+// NODE.childNodes[1].attribs.href url
+// Node.childNodes[1].childNodes[1].childNodes[1].href picUrl
+// Node.childNodes[1].childNodes[1].childNodes[1].alt chapterName
   for (let i = 0; i != items.length; i++) {
       let item = items[i]
-      if (item.attribs.href) {
-          // console.log(item.attribs.href)
-          foundUrls.push(item.attribs.href)
-      }
+      // if (item.attribs.href) {
+      //     // console.log(item.attribs.href)
+      //     foundUrls.push(item.attribs.href)
+      // }
+      let comicUrl = item.childNodes[3].childNodes[1].attribs.href
+      // let picUrl = item.childNodes[1].childNodes[1].childNodes[1].attribs.src
+      // let chapterName = item.childNodes[1].childNodes[1].childNodes[1].attribs.alt
+      foundUrls.push(comicUrl)
   }
   return foundUrls;
 };
