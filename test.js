@@ -14,19 +14,21 @@ const mongoUrl = 'mongodb://localhost:27017';
 const dbName = 'testProject';
 
 
-let obj = {title: "I wish I were you", seriesNum: "117474", link: "http://google.com"}
+let obj = {title: "I wish I were you", seriesNum: "117474", link: "https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474"}
 
 const feed = new Feed({
   title: obj.title,
   description: "This is my personal feed!",
-  id: "http://example.com/",
-  link: "http://example.com/",
+  id: obj.link,
+  link: obj.link,
   language: "en", // optional, used only in RSS 2.0, possible values: http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
-  image: "https://upload.wikimedia.org/wikipedia/commons/0/09/Naver_Line_Webtoon_logo.png",
+//   image: "https://upload.wikimedia.org/wikipedia/commons/0/09/Naver_Line_Webtoon_logo.png",
+  image: "https://webtoon-phinf.pstatic.net/20190719_270/15635185426713GnDk_JPEG/40c1bb66-b65d-4dc0-88c6-046b389e679b.jpg",
+  
 //   favicon: "http://example.com/favicon.ico",
 //   copyright: "All rights reserved 2013, John Doe",
 //   updated: new Date(2013, 6, 14), // optional, default = today
-  generator: "Webtoon comment feed", // optional, default = 'Feed for Node.js'
+  generator: "Feed for I wish I were you", // optional, default = 'Feed for Node.js'
 //   feedLinks: {
 //     json: "https://example.com/json",
 //     atom: "https://example.com/atom"
