@@ -31,7 +31,7 @@ async function findComicUrls(url){
   return foundUrls;
 };
 
-const getUrls = async startUrl => {
+async function* getUrls(startUrl) {
   let s = new Set();
   let foundUrls = []
   var gen = UrlGenerator(startUrl)
@@ -45,15 +45,14 @@ const getUrls = async startUrl => {
     for(x of pageUrls){
       if(!s.has(x))
       {
-        foundUrls.push(x)
+        yield x
         addedAUrl = true
         // console.log(x)
       }
       s.add(x)
     }
     if(!addedAUrl){
-      console.log(JSON.stringify(foundUrls))
-      break;
+      return;
     }
   }
 
@@ -87,6 +86,20 @@ function makeCommentUrl(url){
   const {title, episode} = parseTitleEpisode(url)
   return "https://global.apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=webtoon&templateId=default_new&pool=cbox&_callback=a&lang=en&country=&objectId=c_"  + title + '_' + episode +'&categoryId=&pageSize=30&indexSize=30&groupId=&listType=OBJECT&pageType=default&token=null&consumerKey=BasdOXg&snsCode=null&page=1&initialize=true&userType=&useAltSort=true&replyPageSize=30&sort=favorite&_=156493'
 }
+
+// generate replyUrls
+// keep going until .result.pageModel.nextPage == 0
+function MakeGenerateCommentReplyUrls(commentNo){
+  return function*(episodeUrl) {
+  const {title, episode} = parseTitleEpisode(episodeUrl)
+  let commentUrl = new URL("https://global.apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=webtoon&templateId=default_new&pool=cbox&_callback=a&lang=en&country=&objectId=c_"  + title + '_' + episode +'&categoryId=&parentCommentNo='+commentNo + '&pageSize=30&indexSize=30&groupId=&listType=OBJECT&pageType=default&token=null&consumerKey=BasdOXg&snsCode=null&page=1&userType=&useAltSort=true&_=156493')
+  for(let currentPage=1;;currentPage++){
+    commentUrl.searchParams.set("page", currentPage)
+    yield commentUrl.href
+  }
+}
+}
+
 
 // keep going until .result.pageModel.nextPage == 0
 function* GenerateCommentUrls(episodeUrl){
@@ -146,60 +159,110 @@ const assert = require('assert');
  
 
 
-async function GetComments(episodeUrl){
+async function GetComments(episodeUrl, generator){
   
   let comments = []
-  for(commentPage of GenerateCommentUrls(episodeUrl)){
-    const response = await fetch(commentPage, {headers: {"Referer":"https://www.webtoons.com", "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"}});
+  let total = 0
+
+  let gen = generator(episodeUrl)
+  // gen.next = 
+  let fetchPage = async commentPageUrl => {
+    const response = await fetch(commentPageUrl, {headers: {"Referer":"https://www.webtoons.com", "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"}});
     let data = await response.text();
     var remove_function = data.substr(2,data.length - 4)
-    var results = JSON.parse(remove_function)
-    comments.push(...results.result.bestList)
-    comments.push(...results.result.commentList)
-    if(results.result.pageModel.nextPage == "0"){
-      break;
+    return JSON.parse(remove_function)
+  };
+  var firstResults = await fetchPage(gen.next().value)
+
+  let genCommentsAsync = async function*(){
+
+    for(x of firstResults.result.bestList){
+      yield x
+    }
+    for(x of firstResults.result.commentList){
+      yield x
+    }
+    for(commentPage of gen){
+      var results = await fetchPage(commentPage)
+      for(x of results.result.commentList){
+        yield x
+      }
+      if(results.result.pageModel.nextPage == "0"){
+        return;
+      }
     }
   }
-  return comments;
+  return {total: firstResults.result.count.total, comments: genCommentsAsync} ;
 }
+
+async function LoadCollectionWithComments(episodeUrl, collection, comments){
+  for await(let comment of comments()){
+          
+    comment._id = comment.commentNo
+    comment.insertTime = GetCurrentTime()
+
+    var replyCount = comment.replyCount
+    comment.replyCount = 0
+    var found = await collection.find({_id: comment.commentNo }).toArray()
+    if(found.length == 0){
+      var res = await collection.insertOne(comment);
+    }
+    else if(found[0].replyCount != replyCount){
+      comment.replyCount = 0;
+      await collection.updateOne({ _id: comment.commentNo }, { $set: { replyCount: 0 } })
+    }
+    else{
+      console.log("DB already had ", comment)
+      continue;
+    }
+    let replies = await GetComments(episodeUrl, MakeGenerateCommentReplyUrls(comment.commentNo))
+    await LoadCollectionWithComments(episodeUrl, collection, replies.comments)
+    // insert comments
+    if(replyCount != 0){          
+      await collection.updateOne({ _id: comment.commentNo }, { $set: { replyCount: replyCount } })
+    }
+  }
+}
+
 // GetComments(urls[1])
 
-async function Update(episodeUrl){
+async function Update(startUrl){
+
+
 
   let client, db;
+
 
   try{
      client = await MongoClient.connect(mongoUrl, {useNewUrlParser: true});
      db = client.db(dbName);
-     const collection = db.collection('t1');
-     collection.ensureIndex([["insertTime", -1], ["commentNo", -1]])
+     var startUrlParsed = new URL(startUrl)
+     let seriesTitleNo = startUrlParsed.searchParams.get('title_no')
+     const collection = db.collection(seriesTitleNo);
+     const episodes = db.collection(seriesTitleNo + '_episodes');
      
-      comments = await GetComments(episodeUrl)
-      for(let comment of comments){
-          
-        comment._id = comment.commentNo
-        comment.insertTime = GetCurrentTime()
+     collection.ensureIndex([["insertTime", -1], ["commentNo", -1]])
 
-        var replyCount = comment.replyCount
-        comment.replyCount = 0
-        var found = await collection.find({_id: comment.commentNo }).toArray()
+     let episodeGen = getUrls(startUrl)
+     for await (episodeUrl of episodeGen){
+    
+      const {title, episode} = parseTitleEpisode(episodeUrl)
+      const episodeName = title +'_' +episode
+      
+        comments = await GetComments(episodeUrl, GenerateCommentUrls)
+
+        var found = await episodes.find({_id: episodeName }).toArray()
         if(found.length == 0){
-          var res = await collection.insertOne(comment);
+          var res = await episodes.insertOne({_id: episodeName, total: 0} );
         }
-        else if(found[0].replyCount != replyCount){
-          comment.replyCount = 0;
-          await collection.updateOne({ _id: comment.commentNo }, { $set: { replyCount: 0 } })
+        if(found.length == 0 || comments.total != found[0].total){
+          await LoadCollectionWithComments(episodeUrl, collection, comments.comments)
+                
+          await episodes.updateOne({ _id: episodeName }, { $set: { total: comments.total } })
         }
-        else{
-          console.log("DB already had ", comment)
-          continue;
-        }
-        add code to insert replies
-        // insert comments
-        if(replyCount != 0){          
-          await collection.updateOne({ _id: comment.commentNo }, { $set: { replyCount: replyCount } })
-        }
+
       }
+      
 
     //  let dCollection = db.collection('collectionName');
     //  let result = await dCollection.find();   
@@ -211,6 +274,7 @@ async function Update(episodeUrl){
   finally{ client.close(); } // make sure to close your connection after
 
 }
+
 // get comments generator
 // check if it exists in DB
 // for each comment add a time
@@ -228,7 +292,8 @@ async function main(){
 
   let client, db;
   try{
-    var comments = await getComment(urls[1])
+    let page = await getUrls.next()
+    var comments = await getComment(page.value)
     for(x of comments.result.commentList){
       x._id = x.commentNo
       x.insertTime = GetCurrentTime()
@@ -255,6 +320,6 @@ async function main(){
 
 }
 
-// main()
-Update(urls[1])
+// // main()
+Update(startUrl)
  
