@@ -12,11 +12,11 @@ Completed items
 * load results into database
 * show results in database based on time processed
     * last 50 inserted into database
-
-
 * grab Image for page & put url into db
 * generate list with images
 * generate content that includes replied post in results
+
+
 * periodically rescrape results
 * create docker-compose for results
 

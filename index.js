@@ -32,9 +32,9 @@ async function findComicUrls(url){
       //     foundUrls.push(item.attribs.href)
       // }
       let comicUrl = item.childNodes[3].childNodes[1].attribs.href
-      // let picUrl = item.childNodes[1].childNodes[1].childNodes[1].attribs.src
-      // let chapterName = item.childNodes[1].childNodes[1].childNodes[1].attribs.alt
-      foundUrls.push(comicUrl)
+      let picUrl = item.childNodes[1].childNodes[1].childNodes[1].attribs.src
+      let chapterName = item.childNodes[1].childNodes[1].childNodes[1].attribs.alt
+      foundUrls.push({url: comicUrl, pic: picUrl, title: chapterName})
   }
   return foundUrls;
 };
@@ -50,10 +50,11 @@ async function* getUrls(startUrl) {
     console.log(url)
     var addedAUrl = false
     let pageUrls = await findComicUrls(url)
-    for(x of pageUrls){
+    for(let page of pageUrls){
+      let x = page.url
       if(!s.has(x))
       {
-        yield x
+        yield page
         addedAUrl = true
         // console.log(x)
       }
@@ -252,8 +253,8 @@ async function Update(startUrl){
      collection.ensureIndex([["insertTime", -1], ["commentNo", -1]])
 
      let episodeGen = getUrls(startUrl)
-     for await (episodeUrl of episodeGen){
-    
+     for await (let episodeObj of episodeGen){
+      let episodeUrl = episodeObj.url
       const {title, episode} = parseTitleEpisode(episodeUrl)
       const episodeName = title +'_' +episode
       
@@ -261,12 +262,16 @@ async function Update(startUrl){
 
         var found = await episodes.find({_id: episodeName }).toArray()
         if(found.length == 0){
-          var res = await episodes.insertOne({_id: episodeName, total: 0} );
+          var res = await episodes.insertOne({_id: episodeName, total: 0, title: episode.title, pic: episode.pic} );
         }
         if(found.length == 0 || comments.total != found[0].total){
           await LoadCollectionWithComments(episodeUrl, collection, comments.comments)
                 
           await episodes.updateOne({ _id: episodeName }, { $set: { total: comments.total } })
+        }
+        else if(found[0].title != episodeObj.title){
+          
+          await episodes.updateOne({ _id: episodeName }, { $set: {  title: episodeObj.title, pic: episodeObj.pic } })
         }
 
       }
@@ -296,37 +301,6 @@ async function Update(startUrl){
 const mongoUrl = 'mongodb://localhost:27017';
 // console.log(Date.now())
 const dbName = 'testProject';
-async function main(){
-
-  let client, db;
-  try{
-    let page = await getUrls.next()
-    var comments = await getComment(page.value)
-    for(x of comments.result.commentList){
-      x._id = x.commentNo
-      x.insertTime = GetCurrentTime()
-    }
-     client = await MongoClient.connect(mongoUrl, {useNewUrlParser: true});
-     db = client.db(dbName);
-     const collection = db.collection('t1');
-     collection.ensureIndex([["insertTime", -1], ["commentNo", -1]])
-     // Insert some documents
-     var res = await collection.insertMany(comments.result.commentList);
-     console.log(res)
-
-     var found = await collection.find().sort( [["insertTime", -1], ["commentNo", -1]]).limit(10).toArray()
-     console.log(found)
-    //  let dCollection = db.collection('collectionName');
-    //  let result = await dCollection.find();   
-    //  // let result = await dCollection.countDocuments();
-    //  // your other codes ....
-    //  return result.toArray();
-  }
-  catch(err){ console.error(err); } // catch any mongo error here
-  finally{ client.close(); } // make sure to close your connection after
-
-
-}
 
 // // main()
 Update(startUrl)

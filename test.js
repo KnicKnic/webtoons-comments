@@ -53,14 +53,23 @@ async function GenerateFeed(){
     try{
        client = await MongoClient.connect(mongoUrl, {useNewUrlParser: true});
        db = client.db(dbName);
-       const collection = db.collection('117474');
+       const seriesTitleNo = '117474'
+       const collection = db.collection(seriesTitleNo);
+       const episodes = db.collection(seriesTitleNo + '_episodes');
        
   
        var posts = await collection.find().sort( [["insertTime", -1], ["commentNo", -1]]).limit(100).toArray()
     //    console.log(posts)
 
         generateContent = async function(post){
-            let contents = "User: " + post.userName + "<br>Post: " + post.contents
+            
+            s = post.objectId.split('_')
+            const episodeNo=s[2]
+            const titleNo=s[1]
+            let episodeRow = (await episodes.find({_id: titleNo + "_"+episodeNo}).toArray())[0]
+            const picUrl = episodeRow.pic
+            const title = episodeRow.title
+            let contents = "<img src=\"" + picUrl + "\"/>" + "<p>Chapter: " + title +"</p><p>User: " + post.userName + "</p><p>Post: " + post.contents + "</p>"
             if(post.commentNo != post.parentCommentNo){
                 let parent = (await collection.find({_id: post.parentCommentNo}).toArray())[0]
                 contents += "<br>Parent User: " + parent.userName + "<br>Parent Post: " + parent.contents
@@ -75,8 +84,8 @@ async function GenerateFeed(){
             id: post._id,
             link: GetPostUrl(post.objectId),
             // description: post.contents,
-            description: post.userName,
-            content: await generateContent(post),
+            description: await generateContent(post), //post.userName,
+            // content: await generateContent(post),
             author: [
                 {
                 name: post.userName 
@@ -84,6 +93,7 @@ async function GenerateFeed(){
             ],
             date: new Date(post.insertTime)
             // image: post.image
+            // image: 'https://webtoon-phinf.pstatic.net/20190731_237/1564534544145ItKfB_JPEG/eeac74b4-62fb-423f-a8ed-a8e66f26d319.jpg?type=q90'
             });
         };
         
