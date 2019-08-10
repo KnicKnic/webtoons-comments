@@ -1,9 +1,11 @@
 #!/bin/bash
+PATH=/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin:$PATH
+
 
 # to install
 # chmod u+x run.sh
 # crontab -e
-# 01 * * * * /home/croppy/webtoons-comments/deploy/runs.sh
+# 56 * * * * /home/croppy/webtoons-comments/deploy/run.sh 2>&1  > /home/croppy/webtoons-comments/deploy/log.txt
 
 cd /home/croppy
 
