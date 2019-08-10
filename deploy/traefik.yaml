@@ -1,0 +1,73 @@
+#debug = true
+
+defaultEntryPoints = ["https","http"]
+[entryPoints]
+  # [entryPoints.http_redirect]
+  # address = ":80"
+  #   [entryPoints.http_redirect.redirect]
+  #   entryPoint = "https"
+
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    regex = "http://croppy.beta1042.duckdns.org"
+    replacement = "http://croppy.duckdns.org"
+
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.tls]
+    [entryPoints.https.redirect]
+    regex = "https://croppy.beta1042.duckdns.org"
+    replacement = "https://croppy.duckdns.org"
+
+[acme]
+email = "test@knichome.duckdns.org"
+storage = "acme.json"
+#onHostRule = true
+entryPoint = "https"
+#caServer = "http://172.18.0.1:4000/directory"
+  [acme.dnsChallenge]
+  provider = "duckdns"
+
+
+[[acme.domains]]
+  main = "croppy.duckdns.org"
+
+[[acme.domains]]
+  main = "*.croppy.duckdns.org"
+
+
+[file]
+watch=true
+
+
+
+  [backends.rsswebtoonsviewer]
+    [backends.rsswebtoonsviewer.servers]
+      [backends.rsswebtoonsviewer.servers.server1]
+        url = "http://rss-webtoons-viewer:8081"
+
+  [backends.web]
+    [backends.web.servers]
+      [backends.web.servers.server1]
+        url = "http://web:80"
+
+  [frontends.rsswebtoonsviewer]
+    backend = "rsswebtoonsviewer"
+    passHostHeader = true
+      [frontends.rsswebtoonsviewer.headers]
+      SSLRedirect = true
+      [frontends.rsswebtoonsviewer.routes.server]
+        rule = "Host:rss-viewer.croppy.duckdns.org"
+
+  [frontends.rss]
+    backend = "web"
+    passHostHeader = true
+      [frontends.rss.headers]
+       accessControlAllowMethods= ["GET", "OPTIONS", "PUT"]
+       accessControlAllowOrigin = "*"
+       accessControlMaxAge = 100
+       addVaryHeader = true
+      SSLRedirect = true
+      [frontends.rss.routes.rss]
+        rule = "Host:rss.croppy.duckdns.org;AddPrefix:/webtoons-rss"

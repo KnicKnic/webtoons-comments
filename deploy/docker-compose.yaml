@@ -1,0 +1,43 @@
+version: '2'
+
+services:
+  traefik:
+    image: traefik
+    environment:
+      - DUCKDNS_TOKEN=!!!!!!!!!#$%^&*()(*&^%$#$%^&*)\
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+#    command: "--debug"
+#    command: "--api"
+#    command: "--api --debug"
+    volumes:
+      - ./traefik/traefikdnsall.toml:/traefik.toml
+      - ./traefik/acmedns.json:/acme.json
+    links:
+    - web
+    - rss-webtoons-viewer
+  web:
+    image: nginx:1
+    restart: always
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+  rss-webtoons:
+    image: mongo
+    restart: always
+    volumes:
+      - ./rss-webtoons-mongo:/data/configdb
+  rss-webtoons-viewer:
+    image: mongo-express
+    restart: always
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=rss-webtoons
+      - ME_CONFIG_BASICAUTH_USERNAME=croppy
+      - ME_CONFIG_BASICAUTH_PASSWORD=!!!!!!!!!#$%^&*()(*&^%$#$%^&*)\
+  rss-webtoons-gen:
+    build: ./webtoons-comments
+    image: webtoons-comments:1
+    restart: "no"
+    links:
+      - rss-webtoons
