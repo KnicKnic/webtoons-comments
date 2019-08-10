@@ -18,7 +18,7 @@ let obj = {title: "I wish I were you", seriesNum: "117474", link: "https://www.w
 
 const feed = new Feed({
   title: obj.title,
-  description: "FeedFor",
+  description: "Feed for " + obj.title,
   id: obj.link,
   link: obj.link,
   language: "en", // optional, used only in RSS 2.0, possible values: http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
@@ -28,7 +28,7 @@ const feed = new Feed({
   favicon: "https://webtoons-static.pstatic.net/image/favicon/favicon.ico?dt=2017082301",
 //   copyright: "All rights reserved 2013, John Doe",
 //   updated: new Date(2013, 6, 14), // optional, default = today
-  generator: "Feed for " + obj.title, // optional, default = 'Feed for Node.js'
+  generator: "croppy", // optional, default = 'Feed for Node.js'
 //   feedLinks: {
 //     json: "https://example.com/json",
 //     atom: "https://example.com/atom"

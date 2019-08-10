@@ -14,13 +14,13 @@ git clone https://github.com/KnicKnic/webtoons-comments.git
 docker-compose up -d 
 
 # restart the populate for however many times it needs
-docker-compose run rss-webtoons-gen
+docker-compose run --rm rss-webtoons-gen
 
 # when it is complete change the time on all posts for sorts
-docker-compose run rss-webtoons-gen node updateTime.js
+docker-compose run --rm rss-webtoons-gen node updateTime.js
 
 # generate rss
-docker-compose run rss-webtoons-gen node genRss.js
+docker-compose run --rm rss-webtoons-gen node genRss.js
 ```
 
 # Update steps
