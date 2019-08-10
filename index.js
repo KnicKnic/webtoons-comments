@@ -32,9 +32,10 @@ async function findComicUrls(url){
       //     foundUrls.push(item.attribs.href)
       // }
       let comicUrl = item.childNodes[3].childNodes[1].attribs.href
+      let link = item.childNodes[1].attribs.href
       let picUrl = item.childNodes[1].childNodes[1].childNodes[1].attribs.src
       let chapterName = item.childNodes[1].childNodes[1].childNodes[1].attribs.alt
-      foundUrls.push({url: comicUrl, pic: picUrl, title: chapterName})
+      foundUrls.push({url: comicUrl, pic: picUrl, title: chapterName, link: link})
   }
   return foundUrls;
 };
@@ -67,21 +68,6 @@ async function* getUrls(startUrl) {
 
   };
   // getUrls(startUrl);
-
-
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=1
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=2
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=3
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=4
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=5
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=6
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=7
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=8
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=9
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=10
-// https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=11
-urls = ["https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=116","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=115","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=114","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=113","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=112","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=111","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=109","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=108","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=106","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=105","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=104","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=102","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=101","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=100","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=98","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=97","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=96","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=95","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=94","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=93","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=92","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=91","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=89","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=88","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=87","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=86","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=85","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=83","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=82","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=81","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=80","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=79","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=78","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=77","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=76","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=74","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=73","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=72","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=71","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=70","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=69","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=68","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=67","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=66","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=65","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=64","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=63","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=62","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=61","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=60","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=59","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=58","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=57","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=56","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=55","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=52","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=51","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=50","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=49","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=48","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=46","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=45","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=44","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=43","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=42","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=41","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=40","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=39","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=38","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=37","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=36","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=35","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=34","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=33","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=32","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=31","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=30","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=28","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=26","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=25","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=23","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=22","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=21","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=20","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=19","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=18","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=17","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=16","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=15","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=14","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=13","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=12","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=10","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=9","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=8","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=7","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=6","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=5","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=4","https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=1"]
-
 
 function parseTitleEpisode(url){
 
@@ -233,7 +219,45 @@ async function LoadCollectionWithComments(episodeUrl, collection, comments){
   }
 }
 
-// GetComments(urls[1])
+// GetComments("https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=116")
+
+async function UpdateTitle(db, startUrl){
+
+  var startUrlParsed = new URL(startUrl)
+  let seriesTitleNo = startUrlParsed.searchParams.get('title_no')
+  const collection = db.collection(seriesTitleNo);
+  const episodes = db.collection(seriesTitleNo + '_episodes');
+  
+  await collection.ensureIndex([["insertTime", -1], ["commentNo", -1]])
+ 
+ // collection.createIndexes([{"insertTime": -1, "commentNo": -1}])
+ 
+
+  let episodeGen = getUrls(startUrl)
+  for await (let episodeObj of episodeGen){
+   let episodeUrl = episodeObj.url
+   const {title, episode} = parseTitleEpisode(episodeUrl)
+   const episodeName = title +'_' +episode
+   
+     comments = await GetComments(episodeUrl, GenerateCommentUrls)
+
+     var found = await episodes.find({_id: episodeName }).toArray()
+     if(found.length == 0){
+       var res = await episodes.insertOne({_id: episodeName, total: 0, title: episodeObj.title, pic: episodeObj.pic, url: episodeObj.link} );
+     }
+     if(found.length == 0 || comments.total != found[0].total){
+       await LoadCollectionWithComments(episodeUrl, collection, comments.comments)
+             
+       await episodes.updateOne({ _id: episodeName }, { $set: { total: comments.total } })
+     }
+     else if(found[0].url != episodeObj.link){
+       
+       await episodes.updateOne({ _id: episodeName }, { $set: {  title: episodeObj.title, pic: episodeObj.pic, url: episodeObj.link } })
+     }
+
+   }
+   
+}
 
 async function Update(startUrl){
 
@@ -244,39 +268,8 @@ async function Update(startUrl){
 
   try{
      client = await MongoClient.connect(mongoUrl, {useNewUrlParser: true});
-     db = client.db(dbName);
-     var startUrlParsed = new URL(startUrl)
-     let seriesTitleNo = startUrlParsed.searchParams.get('title_no')
-     const collection = db.collection(seriesTitleNo);
-     const episodes = db.collection(seriesTitleNo + '_episodes');
-     
-     collection.ensureIndex([["insertTime", -1], ["commentNo", -1]])
-
-     let episodeGen = getUrls(startUrl)
-     for await (let episodeObj of episodeGen){
-      let episodeUrl = episodeObj.url
-      const {title, episode} = parseTitleEpisode(episodeUrl)
-      const episodeName = title +'_' +episode
-      
-        comments = await GetComments(episodeUrl, GenerateCommentUrls)
-
-        var found = await episodes.find({_id: episodeName }).toArray()
-        if(found.length == 0){
-          var res = await episodes.insertOne({_id: episodeName, total: 0, title: episode.title, pic: episode.pic} );
-        }
-        if(found.length == 0 || comments.total != found[0].total){
-          await LoadCollectionWithComments(episodeUrl, collection, comments.comments)
-                
-          await episodes.updateOne({ _id: episodeName }, { $set: { total: comments.total } })
-        }
-        else if(found[0].title != episodeObj.title){
-          
-          await episodes.updateOne({ _id: episodeName }, { $set: {  title: episodeObj.title, pic: episodeObj.pic } })
-        }
-
-      }
-      
-
+     db = client. db(dbName);
+     await UpdateTitle(db, startUrl)
     //  let dCollection = db.collection('collectionName');
     //  let result = await dCollection.find();   
     //  // let result = await dCollection.countDocuments();

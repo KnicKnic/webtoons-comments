@@ -18,17 +18,17 @@ let obj = {title: "I wish I were you", seriesNum: "117474", link: "https://www.w
 
 const feed = new Feed({
   title: obj.title,
-  description: "This is my personal feed!",
+  description: "FeedFor",
   id: obj.link,
   link: obj.link,
   language: "en", // optional, used only in RSS 2.0, possible values: http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
-//   image: "https://upload.wikimedia.org/wikipedia/commons/0/09/Naver_Line_Webtoon_logo.png",
-  image: "https://webtoon-phinf.pstatic.net/20190719_270/15635185426713GnDk_JPEG/40c1bb66-b65d-4dc0-88c6-046b389e679b.jpg",
+  image: "https://upload.wikimedia.org/wikipedia/commons/0/09/Naver_Line_Webtoon_logo.png",
+//   image: "https://webtoon-phinf.pstatic.net/20190719_270/15635185426713GnDk_JPEG/40c1bb66-b65d-4dc0-88c6-046b389e679b.jpg",
   
-//   favicon: "http://example.com/favicon.ico",
+  favicon: "https://webtoons-static.pstatic.net/image/favicon/favicon.ico?dt=2017082301",
 //   copyright: "All rights reserved 2013, John Doe",
 //   updated: new Date(2013, 6, 14), // optional, default = today
-  generator: "Feed for I wish I were you", // optional, default = 'Feed for Node.js'
+  generator: "Feed for " + obj.title, // optional, default = 'Feed for Node.js'
 //   feedLinks: {
 //     json: "https://example.com/json",
 //     atom: "https://example.com/atom"
@@ -39,13 +39,6 @@ const feed = new Feed({
 //     link: "https://example.com/johndoe"
 //   }
 });
- 
-function GetPostUrl(objectId){
-    // objectId = 'c_117474_106'
-    s = objectId.split('_')
-    return 'https://www.webtoons.com/en/challenge/i-wish-i-were-you/chapter-81/viewer?title_no=' + s[1]  + '&episode_no=' + s[2]
-}
-
 
 async function GenerateFeed(){
 
@@ -53,7 +46,7 @@ async function GenerateFeed(){
     try{
        client = await MongoClient.connect(mongoUrl, {useNewUrlParser: true});
        db = client.db(dbName);
-       const seriesTitleNo = '117474'
+       const seriesTitleNo = obj.seriesNum
        const collection = db.collection(seriesTitleNo);
        const episodes = db.collection(seriesTitleNo + '_episodes');
        
@@ -61,15 +54,18 @@ async function GenerateFeed(){
        var posts = await collection.find().sort( [["insertTime", -1], ["commentNo", -1]]).limit(100).toArray()
     //    console.log(posts)
 
-        generateContent = async function(post){
-            
+        getEpisodeRow = async function (post){
             s = post.objectId.split('_')
             const episodeNo=s[2]
             const titleNo=s[1]
-            let episodeRow = (await episodes.find({_id: titleNo + "_"+episodeNo}).toArray())[0]
+            return (await episodes.find({_id: titleNo + "_"+episodeNo}).toArray())[0]
+        }
+
+        generateContent = async function(post){            
+            let episodeRow = await getEpisodeRow(post)
             const picUrl = episodeRow.pic
             const title = episodeRow.title
-            let contents = "<img src=\"" + picUrl + "\"/>" + "<p>Chapter: " + title +"</p><p>User: " + post.userName + "</p><p>Post: " + post.contents + "</p>"
+            let contents = /* "<img src=\"" + picUrl + "\"/>" + "<p>" +*/ "Chapter: " + title +"</p><p>User: " + post.userName + "</p><p>Post: " + post.contents + "</p>"
             if(post.commentNo != post.parentCommentNo){
                 let parent = (await collection.find({_id: post.parentCommentNo}).toArray())[0]
                 contents += "<br>Parent User: " + parent.userName + "<br>Parent Post: " + parent.contents
@@ -77,12 +73,16 @@ async function GenerateFeed(){
             return contents
         }
 
+        getPostUrl = async function (post){           
+            let episodeRow = await getEpisodeRow(post)
+            return episodeRow.url
+        }
             
         for( post of posts){
             feed.addItem({
             title: post.contents,
             id: post._id,
-            link: GetPostUrl(post.objectId),
+            link: await getPostUrl(post),
             // description: post.contents,
             description: await generateContent(post), //post.userName,
             // content: await generateContent(post),
