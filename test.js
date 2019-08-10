@@ -114,8 +114,8 @@ async function GenerateFeed(){
         
         // console.log(feed.json1());
 
-        await fs.writeFile("/tmp/feed.xml",feed.atom1())
-        await fs.writeFile("/tmp/rss.xml",feed.rss2())
+        await fs.writeFile("/feed/" + obj.seriesNum + "-atom.xml",feed.atom1())
+        await fs.writeFile("/feed/" + obj.seriesNum + "-rss.xml",feed.rss2())
     }
     catch(err){ console.error(err); } // catch any mongo error here
     finally{ client.close(); } // make sure to close your connection after
