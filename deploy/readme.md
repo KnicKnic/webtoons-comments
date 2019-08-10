@@ -20,5 +20,6 @@ docker-compose run rss-webtoons-gen
 docker-compose run rss-webtoons-gen node updateTime.js
 ```
 
+docker-compose build rss-webtoons-gen
 
 

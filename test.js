@@ -91,7 +91,7 @@ async function GenerateFeed(){
                 name: post.userName 
                 }
             ],
-            date: new Date(post.insertTime)
+            date: new Date(post.modTimeGmt)
             // image: post.image
             // image: 'https://webtoon-phinf.pstatic.net/20190731_237/1564534544145ItKfB_JPEG/eeac74b4-62fb-423f-a8ed-a8e66f26d319.jpg?type=q90'
             });
