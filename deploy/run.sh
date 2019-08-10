@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # to install
+# chmod u+x run.sh
 # crontab -e
 # 01 * * * * /home/croppy/webtoons-comments/deploy/runs.sh
 
