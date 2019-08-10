@@ -291,9 +291,9 @@ async function Update(startUrl){
 // update original to contain count of replies
 
 // Connection URL
-const mongoUrl = 'mongodb://localhost:27017';
+const mongoUrl = 'mongodb://rss-webtoons:27017';
 // console.log(Date.now())
-const dbName = 'testProject';
+const dbName = 'rss-webtoons';
 
 // // main()
 Update(startUrl)

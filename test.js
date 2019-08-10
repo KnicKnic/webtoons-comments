@@ -9,9 +9,9 @@ const Feed = feed_fe.Feed;
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 // Connection URL
-const mongoUrl = 'mongodb://localhost:27017';
+const mongoUrl = 'mongodb://rss-webtoons:27017';
 // console.log(Date.now())
-const dbName = 'testProject';
+const dbName = 'rss-webtoons';
 
 
 let obj = {title: "I wish I were you", seriesNum: "117474", link: "https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474"}
