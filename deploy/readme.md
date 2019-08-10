@@ -18,8 +18,14 @@ docker-compose run rss-webtoons-gen
 
 # when it is complete change the time on all posts for sorts
 docker-compose run rss-webtoons-gen node updateTime.js
+
+# generate rss
+docker-compose run rss-webtoons-gen node genRss.js
 ```
 
-docker-compose build rss-webtoons-gen
+# Update steps
 
+```bash
+docker-compose build rss-webtoons-gen
+```
 
