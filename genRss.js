@@ -51,7 +51,7 @@ async function GenerateFeed(){
        const episodes = db.collection(seriesTitleNo + '_episodes');
        
   
-       var posts = await collection.find().sort( [["insertTime", -1], ["commentNo", -1]]).limit(100).toArray()
+       var posts = await collection.find().sort( [["insertTime", 1], ["commentNo", -1]]).limit(100).toArray()
     //    console.log(posts)
 
         getEpisodeRow = async function (post){
@@ -81,7 +81,8 @@ async function GenerateFeed(){
         for( post of posts){
             feed.addItem({
             title: post.contents,
-            id: post._id,
+            guid: post._id.toString(),
+            id: post._id.toString(),
             link: await getPostUrl(post),
             // description: post.contents,
             description: await generateContent(post), //post.userName,
