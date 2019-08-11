@@ -58,9 +58,9 @@ async function GenerateFeed(){
             let episodeRow = await getEpisodeRow(post)
             return episodeRow.url
         }
-        async function MakeFeed(posts){
+        async function MakeFeed(posts, title){
             const feed = new Feed({
-                title: obj.title,
+                title: title,
                 description: "Feed for " + obj.title,
                 id: obj.link,
                 link: obj.link,
@@ -115,7 +115,7 @@ async function GenerateFeed(){
         }
         
        var posts = await collection.find().sort( [["insertTime", -1], ["commentNo", -1]]).limit(100).toArray()
-       let feed = await MakeFeed(posts)
+       let feed = await MakeFeed(posts, obj.title)
 
        await fs.writeFile(feedLocation + obj.seriesNum + "-atom.xml",feed.atom1())
        await fs.writeFile(feedLocation + obj.seriesNum + "-rss.xml",feed.rss2())
@@ -138,7 +138,7 @@ async function GenerateFeed(){
        }
 
        posts = await collection.find().sort( [["insertTime", -1], ["commentNo", -1]]).filter({objectId: {$nin: toFilter}}).limit(100).toArray()
-       feed = await MakeFeed(posts)
+       feed = await MakeFeed(posts, "Old: "+ obj.title)
 
        await fs.writeFile(feedLocation + obj.seriesNum + "-old-atom.xml",feed.atom1())
        await fs.writeFile(feedLocation + obj.seriesNum + "-old-rss.xml",feed.rss2())
