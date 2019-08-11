@@ -8,37 +8,21 @@ const Feed = feed_fe.Feed;
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
+
+const old_skip_count = 3
 // Connection URL
 const mongoUrl = 'mongodb://rss-webtoons:27017';
-// console.log(Date.now())
 const dbName = 'rss-webtoons';
+let feedLocation = "/feed/"
+// const mongoUrl = 'mongodb://localhost:27017';
+// const dbName = 'testProject';
+// let feedLocation = "c:\\tmp\\"
 
 
-let obj = {title: "I wish I were you", seriesNum: "117474", link: "https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474"}
 
-const feed = new Feed({
-  title: obj.title,
-  description: "Feed for " + obj.title,
-  id: obj.link,
-  link: obj.link,
-  language: "en", // optional, used only in RSS 2.0, possible values: http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
-  image: "https://upload.wikimedia.org/wikipedia/commons/0/09/Naver_Line_Webtoon_logo.png",
-//   image: "https://webtoon-phinf.pstatic.net/20190719_270/15635185426713GnDk_JPEG/40c1bb66-b65d-4dc0-88c6-046b389e679b.jpg",
-  
-  favicon: "https://webtoons-static.pstatic.net/image/favicon/favicon.ico?dt=2017082301",
-//   copyright: "All rights reserved 2013, John Doe",
-//   updated: new Date(2013, 6, 14), // optional, default = today
-  generator: "croppy", // optional, default = 'Feed for Node.js'
-//   feedLinks: {
-//     json: "https://example.com/json",
-//     atom: "https://example.com/atom"
-//   },
-//   author: {
-//     name: "John Doe",
-//     email: "johndoe@example.com",
-//     link: "https://example.com/johndoe"
-//   }
-});
+let obj = {typePrefix: "c_", title: "I wish I were you", seriesNum: "117474", link: "https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474"}
+
+
 
 async function GenerateFeed(){
 
@@ -50,11 +34,8 @@ async function GenerateFeed(){
        const collection = db.collection(seriesTitleNo);
        const episodes = db.collection(seriesTitleNo + '_episodes');
        
-  
-       var posts = await collection.find().sort( [["insertTime", 1], ["commentNo", -1]]).limit(100).toArray()
-    //    console.log(posts)
 
-        getEpisodeRow = async function (post){
+       getEpisodeRow = async function (post){
             s = post.objectId.split('_')
             const episodeNo=s[2]
             const titleNo=s[1]
@@ -77,46 +58,90 @@ async function GenerateFeed(){
             let episodeRow = await getEpisodeRow(post)
             return episodeRow.url
         }
-            
-        for( post of posts){
-            feed.addItem({
-            title: post.contents,
-            guid: post._id.toString(),
-            id: post._id.toString(),
-            link: await getPostUrl(post),
-            // description: post.contents,
-            description: await generateContent(post), //post.userName,
-            // content: await generateContent(post),
-            author: [
-                {
-                name: post.userName 
-                }
-            ],
-            date: new Date(post.modTimeGmt)
-            // image: post.image
-            // image: 'https://webtoon-phinf.pstatic.net/20190731_237/1564534544145ItKfB_JPEG/eeac74b4-62fb-423f-a8ed-a8e66f26d319.jpg?type=q90'
+        async function MakeFeed(posts){
+            const feed = new Feed({
+                title: obj.title,
+                description: "Feed for " + obj.title,
+                id: obj.link,
+                link: obj.link,
+                language: "en", // optional, used only in RSS 2.0, possible values: http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
+                // image: "https://upload.wikimedia.org/wikipedia/commons/0/09/Naver_Line_Webtoon_logo.png",
+            //   image: "https://webtoon-phinf.pstatic.net/20190719_270/15635185426713GnDk_JPEG/40c1bb66-b65d-4dc0-88c6-046b389e679b.jpg",
+                
+                // favicon: "https://webtoons-static.pstatic.net/image/favicon/favicon.ico?dt=2017082301",
+            //   copyright: "All rights reserved 2013, John Doe",
+            //   updated: new Date(2013, 6, 14), // optional, default = today
+                generator: "croppy", // optional, default = 'Feed for Node.js'
+            //   feedLinks: {
+            //     json: "https://example.com/json",
+            //     atom: "https://example.com/atom"
+            //   },
+            //   author: {
+            //     name: "John Doe",
+            //     email: "johndoe@example.com",
+            //     link: "https://example.com/johndoe"
+            //   }
             });
-        };
+               
+            for( post of posts){
+                feed.addItem({
+                title: post.contents,
+                guid: post._id.toString(),
+                id: post._id.toString(),
+                link: await getPostUrl(post),
+                // description: post.contents,
+                description: await generateContent(post), //post.userName,
+                // content: await generateContent(post),
+                author: [
+                    {
+                    name: post.userName 
+                    }
+                ],
+                date: new Date(post.modTimeGmt)
+                // image: post.image
+                // image: 'https://webtoon-phinf.pstatic.net/20190731_237/1564534544145ItKfB_JPEG/eeac74b4-62fb-423f-a8ed-a8e66f26d319.jpg?type=q90'
+                });
+            };
+            // feed.addCategory("Technologie");
+            
+            // feed.addContributor({
+            //     name: "Johan Cruyff",
+            //     email: "johancruyff@example.com",
+            //     link: "https://example.com/johancruyff"
+            // }
+            // );
+            
+            return feed
+        }
         
-        // feed.addCategory("Technologie");
-        
-        // feed.addContributor({
-        //     name: "Johan Cruyff",
-        //     email: "johancruyff@example.com",
-        //     link: "https://example.com/johancruyff"
-        // }
-        // );
-        
-        // console.log(feed.rss2());
-        // // Output: RSS 2.0
-        
-        // console.log(feed.atom1());
-        // // Output: Atom 1.0
-        
-        // console.log(feed.json1());
+       var posts = await collection.find().sort( [["insertTime", -1], ["commentNo", -1]]).limit(100).toArray()
+       let feed = await MakeFeed(posts)
 
-        await fs.writeFile("/feed/" + obj.seriesNum + "-atom.xml",feed.atom1())
-        await fs.writeFile("/feed/" + obj.seriesNum + "-rss.xml",feed.rss2())
+       await fs.writeFile(feedLocation + obj.seriesNum + "-atom.xml",feed.atom1())
+       await fs.writeFile(feedLocation + obj.seriesNum + "-rss.xml",feed.rss2())
+
+       // get posts, but not newest ones
+
+       function EpisodeGetEpisodeNumber(episode){return Number(episode._id.split("_")[1])}
+
+       var allEpisodes = await episodes.find().toArray()
+       function idSorter(a,b){
+        let aEp = EpisodeGetEpisodeNumber(a)
+        let bEp = EpisodeGetEpisodeNumber(b)
+        return bEp - aEp
+       }
+       allEpisodes.sort(idSorter)
+
+       toFilter = []
+       for(let i = 0; i< allEpisodes.length && i< old_skip_count; ++i){
+        toFilter.push(obj.typePrefix + allEpisodes[i]._id)
+       }
+
+       posts = await collection.find().sort( [["insertTime", -1], ["commentNo", -1]]).filter({objectId: {$nin: toFilter}}).limit(100).toArray()
+       feed = await MakeFeed(posts)
+
+       await fs.writeFile(feedLocation + obj.seriesNum + "-old-atom.xml",feed.atom1())
+       await fs.writeFile(feedLocation + obj.seriesNum + "-old-rss.xml",feed.rss2())
     }
     catch(err){ console.error(err); } // catch any mongo error here
     finally{ client.close(); } // make sure to close your connection after
