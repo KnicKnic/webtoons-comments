@@ -1,6 +1,9 @@
 # Goal
 generate RSS of webtoons comments and play with mongodb
 
+# Deploy instructions
+see deploy/readme.md
+
 # TODO
 
 Completed items
@@ -15,8 +18,6 @@ Completed items
 * grab Image for page & put url into db
 * generate list with images
 * generate content that includes replied post in results
-
-
 * periodically rescrape results
 * create docker-compose for results
 
