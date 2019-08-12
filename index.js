@@ -4,7 +4,12 @@ var cheerio = require('cheerio');
 
 var urls = []
 
-var startUrl = "https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474&page=1"
+// Connection URL
+
+const mongoUrl = 'mongodb://rss-webtoons:27017';
+const dbName = 'rss-webtoons';
+// const mongoUrl = 'mongodb://localhost:27017';
+// const dbName = 'testProject';
 
 function* UrlGenerator(startUrl){
   let baseUrl = startUrl.substr(0,startUrl.length -1)
@@ -269,7 +274,13 @@ async function Update(startUrl){
   try{
      client = await MongoClient.connect(mongoUrl, {useNewUrlParser: true});
      db = client. db(dbName);
-     await UpdateTitle(db, startUrl)
+     
+     const comics = db.collection("comics");
+
+     var allComics = await comics.find().toArray()
+     for(let comic of allComics){
+      await UpdateTitle(db, comic.link + "&page=1")
+     }
     //  let dCollection = db.collection('collectionName');
     //  let result = await dCollection.find();   
     //  // let result = await dCollection.countDocuments();
@@ -290,11 +301,7 @@ async function Update(startUrl){
 // write replies to DB
 // update original to contain count of replies
 
-// Connection URL
-const mongoUrl = 'mongodb://rss-webtoons:27017';
-// console.log(Date.now())
-const dbName = 'rss-webtoons';
 
 // // main()
-Update(startUrl)
+Update()
  
