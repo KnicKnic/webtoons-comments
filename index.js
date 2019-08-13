@@ -1,15 +1,17 @@
 const fetch = require('node-fetch');
 var cheerio = require('cheerio');
-
+const fs = require('fs').promises;
 
 var urls = []
 
 // Connection URL
 
-const mongoUrl = 'mongodb://rss-webtoons:27017';
-const dbName = 'rss-webtoons';
-// const mongoUrl = 'mongodb://localhost:27017';
-// const dbName = 'testProject';
+// const mongoUrl = 'mongodb://rss-webtoons:27017';
+// const dbName = 'rss-webtoons';
+// let feedLocation = "/feed/"
+const mongoUrl = 'mongodb://localhost:27017';
+const dbName = 'testProject';
+let feedLocation = "c:\\tmp\\"
 
 function* UrlGenerator(startUrl){
   let baseUrl = startUrl.substr(0,startUrl.length -1)
@@ -250,7 +252,7 @@ async function UpdateTitle(db, startUrl, comic){
   if(comic.lastGenerated){
     let lastGenerated = new Date(comic.lastGenerated)
     let current = new Date()
-    generatedOldToday = lastGenerated.Date() == current.Date()
+    generatedOldToday = lastGenerated.getDate() == current.getDate()
   }
 
   let episodeGen = getUrls(startUrl)
@@ -296,13 +298,20 @@ async function Update(startUrl){
      db = client. db(dbName);
      let currentDate = new Date()
      const comics = db.collection("comics");
-
+     let indexPageMiddle = ""
      var allComics = await comics.find().toArray()
-     for(let scomic of allComics){
+     for(let comic of allComics){
+      function GenerateLink(url){return "<a href=\"" + url + "\">"+url+"</a>"}
+      indexPageMiddle += "<tr><td>" + comic.title + "</td><td>atom</td><td>all</td><td>" + GenerateLink("https://rss.croppy.duckdns.org/"+comic.seriesNum +"-atom.xml") + "</td></tr>"
+      indexPageMiddle += "<tr><td>" + comic.title + "</td><td>atom</td><td>just old</td><td>" + GenerateLink("https://rss.croppy.duckdns.org/"+comic.seriesNum +"-old-atom.xml") + "</td></tr>"
+      indexPageMiddle += "<tr><td>" + comic.title + "</td><td>rss</td><td>all</td><td>" + GenerateLink("https://rss.croppy.duckdns.org/"+comic.seriesNum +"-rss.xml") + "</td></tr>"
+      indexPageMiddle += "<tr><td>" + comic.title + "</td><td>rss</td><td>just old</td><td>" + GenerateLink("https://rss.croppy.duckdns.org/"+comic.seriesNum +"-old-rss.xml") + "</td></tr>"
       await UpdateTitle(db, comic.link + "&page=1", comic)
       await comics.updateOne({ _id: comic._id }, { $set: {  lastGenerated: currentDate.getTime()} })
      }
-     
+    
+     await fs.writeFile(feedLocation +"index.html",indexPageBegin + indexPageMiddle + indexPageEnd)
+
     //  let dCollection = db.collection('collectionName');
     //  let result = await dCollection.find();   
     //  // let result = await dCollection.countDocuments();
@@ -322,6 +331,35 @@ async function Update(startUrl){
 // load Replies
 // write replies to DB
 // update original to contain count of replies
+
+
+let indexPageBegin = `<!DOCTYPE html>
+<html>
+<head>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+
+<h2>Feeds</h2>
+
+<table style="width:100%">
+  <tr>
+    <th>Title</th>
+    <th>Feed Type</th>
+    <th>All episodes</th> 
+    <th>Feed Url</th>
+  </tr>`
+let indexPageEnd = `
+</table>
+
+</body>
+</html>
+`
 
 
 // // main()
