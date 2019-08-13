@@ -9,7 +9,6 @@ const Feed = feed_fe.Feed;
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
-const old_skip_count = 3
 // Connection URL
 const mongoUrl = 'mongodb://rss-webtoons:27017';
 const dbName = 'rss-webtoons';
@@ -37,6 +36,10 @@ async function GenerateFeed(){
         var allComics = await comics.find().toArray()
         
        for(let obj of allComics){
+            let old_skip_count = 3
+            if(obj.oldCount){
+                old_skip_count = obj.oldCount
+            }
             const seriesTitleNo = obj.seriesNum
             const collection = db.collection(seriesTitleNo);
             const episodes = db.collection(seriesTitleNo + '_episodes');

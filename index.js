@@ -226,7 +226,7 @@ async function LoadCollectionWithComments(episodeUrl, collection, comments){
 
 // GetComments("https://www.webtoons.com/challenge/episode?titleNo=117474&episodeNo=116")
 
-async function UpdateTitle(db, startUrl){
+async function UpdateTitle(db, startUrl, comic){
 
   var startUrlParsed = new URL(startUrl)
   let seriesTitleNo = startUrlParsed.searchParams.get('title_no')
@@ -236,13 +236,33 @@ async function UpdateTitle(db, startUrl){
   await collection.ensureIndex([["insertTime", -1], ["commentNo", -1]])
  
  // collection.createIndexes([{"insertTime": -1, "commentNo": -1}])
- 
+  let countGenerated = 0
+  
+  let old_skip_count = 3
+  if(comic.oldCount){
+      old_skip_count = comic.oldCount
+  }
+  let generateOldDaily = false
+  if(comic.generateOldDaily){
+    generateOldDaily = true
+  }
+  let generatedOldToday = false
+  if(comic.lastGenerated){
+    let lastGenerated = new Date(comic.lastGenerated)
+    let current = new Date()
+    generatedOldToday = lastGenerated.Date() == current.Date()
+  }
 
   let episodeGen = getUrls(startUrl)
   for await (let episodeObj of episodeGen){
-   let episodeUrl = episodeObj.url
-   const {title, episode} = parseTitleEpisode(episodeUrl)
-   const episodeName = title +'_' +episode
+    if(generateOldDaily && generatedOldToday && countGenerated >= old_skip_count ){
+      break
+    }
+    countGenerated++
+
+    let episodeUrl = episodeObj.url
+    const {title, episode} = parseTitleEpisode(episodeUrl)
+    const episodeName = title +'_' +episode
    
      comments = await GetComments(episodeUrl, GenerateCommentUrls)
 
@@ -274,13 +294,15 @@ async function Update(startUrl){
   try{
      client = await MongoClient.connect(mongoUrl, {useNewUrlParser: true});
      db = client. db(dbName);
-     
+     let currentDate = new Date()
      const comics = db.collection("comics");
 
      var allComics = await comics.find().toArray()
-     for(let comic of allComics){
-      await UpdateTitle(db, comic.link + "&page=1")
+     for(let scomic of allComics){
+      await UpdateTitle(db, comic.link + "&page=1", comic)
+      await comics.updateOne({ _id: comic._id }, { $set: {  lastGenerated: currentDate.getTime()} })
      }
+     
     //  let dCollection = db.collection('collectionName');
     //  let result = await dCollection.find();   
     //  // let result = await dCollection.countDocuments();
