@@ -6,12 +6,12 @@ var urls = []
 
 // Connection URL
 
-// const mongoUrl = 'mongodb://rss-webtoons:27017';
-// const dbName = 'rss-webtoons';
-// let feedLocation = "/feed/"
-const mongoUrl = 'mongodb://localhost:27017';
-const dbName = 'testProject';
-let feedLocation = "c:\\tmp\\"
+const mongoUrl = 'mongodb://rss-webtoons:27017';
+const dbName = 'rss-webtoons';
+let feedLocation = "/feed/"
+// const mongoUrl = 'mongodb://localhost:27017';
+// const dbName = 'testProject';
+// let feedLocation = "c:\\tmp\\"
 
 function* UrlGenerator(startUrl){
   let baseUrl = startUrl.substr(0,startUrl.length -1)
