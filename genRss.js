@@ -1,5 +1,6 @@
 
 const fs = require('fs').promises;
+var os = require('os');
 
 const feed_fe = require('feed');
 const Feed = feed_fe.Feed;
@@ -10,12 +11,14 @@ const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
 // Connection URL
-const mongoUrl = 'mongodb://rss-webtoons:27017';
-const dbName = 'rss-webtoons';
+let mongoUrl = 'mongodb://rss-webtoons:27017';
+let dbName = 'rss-webtoons';
 let feedLocation = "/feed/"
-// const mongoUrl = 'mongodb://localhost:27017';
-// const dbName = 'testProject';
-// let feedLocation = "c:\\tmp\\"
+if(os.platform() == "win32"){
+  mongoUrl = 'mongodb://localhost:27017';
+  dbName = 'testProject';
+  feedLocation = "c:\\tmp\\"
+}
 
 
 /*

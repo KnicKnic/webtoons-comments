@@ -1,12 +1,18 @@
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
-// Connection URL
+var os = require('os');
 
-const mongoUrl = 'mongodb://rss-webtoons:27017';
-const dbName = 'rss-webtoons';
-// const mongoUrl = 'mongodb://localhost:27017';
-// const dbName = 'testProject';
+
+// Connection URL
+let mongoUrl = 'mongodb://rss-webtoons:27017';
+let dbName = 'rss-webtoons';
+let feedLocation = "/feed/"
+if(os.platform() == "win32"){
+  mongoUrl = 'mongodb://localhost:27017';
+  dbName = 'testProject';
+  feedLocation = "c:\\tmp\\"
+}
 
 
 async function GenerateFeed(){
