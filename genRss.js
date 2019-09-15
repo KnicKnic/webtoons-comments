@@ -21,7 +21,9 @@ if(os.platform() == "win32"){
 }
 
 
-/*
+/*https://www.webtoons.com/en/challenge/sunny-side-skies/list?title_no=70280
+{_id: "70280", generateOldDaily: true, typePrefix: "c_", title: "Sunny Side Skies", seriesNum: "70280", link: "https://www.webtoons.com/en/challenge/sunny-side-skies/list?title_no=70280"}
+
 {_id: "117474", typePrefix: "c_", title: "I wish I were you", seriesNum: "117474", link: "https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474"}
 {_id: "303991", typePrefix: "c_", title: "Draigon", seriesNum: "303991", link: "https://www.webtoons.com/en/challenge/draigon/list?title_no=303991"}
 {_id: "212675", typePrefix: "c_", title: "Lamp-chan", seriesNum: "212675", link: "https://www.webtoons.com/en/challenge/lamp-chan/list?title_no=212675"}
