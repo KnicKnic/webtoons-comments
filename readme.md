@@ -36,3 +36,6 @@ Completed items
 
 see [scraping_notes.md](scraping_notes.md) and [fetch.md](fetch.md)
 
+### Translation is supported
+
+see [deploy/readme.md](deploy/readme.md)

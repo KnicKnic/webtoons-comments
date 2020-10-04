@@ -61,9 +61,16 @@ async function GenerateFeed(){
                     let episodeRow = await getEpisodeRow(post)
                     const picUrl = episodeRow.pic
                     const title = episodeRow.title
+                    if('contentsTranslated' in post){
+                        post.contents = post.contentsTranslated
+                    }
                     let contents = /* "<img src=\"" + picUrl + "\"/>" + "<p>" +*/ "Chapter: " + title +"</p><p>User: " + post.userName + "</p><p>Post: " + post.contents + "</p>"
                     if(post.commentNo != post.parentCommentNo){
                         let parent = (await collection.find({_id: post.parentCommentNo}).toArray())[0]
+                        
+                        if('contentsTranslated' in parent){
+                            parent.contents = parent.contentsTranslated
+                        }
                         contents += "<br>Parent User: " + parent.userName + "<br>Parent Post: " + parent.contents
                     }
                     return contents
@@ -99,6 +106,9 @@ async function GenerateFeed(){
                     });
                     
                     for( post of posts){
+                        if('contentsTranslated' in post){
+                            post.contents = post.contentsTranslated
+                        }
                         feed.addItem({
                         title: post.contents,
                         guid: post._id.toString(),
