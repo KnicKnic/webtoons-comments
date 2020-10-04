@@ -1,7 +1,17 @@
 const fetch = require('node-fetch');
+const utf8 = require('utf8');
 var cheerio = require('cheerio');
 const fs = require('fs').promises;
 var os = require('os');
+const axios = require('axios').default;
+// const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
+
+
+var endpoint = "https://api.cognitive.microsofttranslator.com";
+var sourceLanguage = "en"
+var subcriptionKey = ""
+
 
 
 var urls = []
@@ -27,7 +37,8 @@ function* UrlGenerator(startUrl){
 // Find urls
 async function findComicUrls(url){
   let foundUrls = []
-  const response = await fetch(url);
+  let tUrl = encodeURI(url) //utf8.encode(url)
+  const response = await fetch(tUrl);
   const html = await response.text();
   const $ = cheerio.load(html);
   let items = $('li[data-episode-no]')
@@ -211,6 +222,9 @@ async function LoadCollectionWithComments(episodeUrl, collection, comments){
     comment.replyCount = 0
     var found = await collection.find({_id: comment.commentNo }).toArray()
     if(found.length == 0){
+      if(sourceLanguage != "en") {
+        comment.contentsTranslated = await Translate(comment.contents)
+      }
       var res = await collection.insertOne(comment);
     }
     else if(found[0].replyCount != replyCount){
@@ -290,6 +304,37 @@ async function UpdateTitle(db, startUrl, comic){
    
 }
 
+async function Translate(comment){
+  var someRequest = {
+    baseURL: endpoint,
+    url: '/translate',
+    method: 'post',
+    headers: {
+        'Ocp-Apim-Subscription-Key': subscriptionKey,
+        'Content-type': 'application/json',
+        'Ocp-Apim-Subscription-Region': 'eastus',
+        'X-ClientTraceId': uuidv4().toString()
+    },
+    params: {
+        'api-version': '3.0',
+        'from': sourceLanguage,
+        'to': ['en']
+    },
+    data: [{
+        'text': comment
+    }],
+    responseType: 'json'
+  } 
+  try{
+    var resp = await axios(someRequest)
+    return resp.data[0].translations[0].text
+  }catch(err){
+    console.log(comment)
+    console.error(err); 
+    throw err
+  }
+}
+
 async function Update(startUrl){
 
 
@@ -301,10 +346,17 @@ async function Update(startUrl){
      client = await MongoClient.connect(mongoUrl, {useNewUrlParser: true});
      db = client. db(dbName);
      let currentDate = new Date()
+     
      const comics = db.collection("comics");
      let indexPageMiddle = ""
      var allComics = await comics.find().toArray()
      for(let comic of allComics){
+      if ('sourceLanguage' in comic) {
+        sourceLanguage = comic.sourceLanguage
+        subscriptionKey = comic.subscriptionKey
+      }else{
+        sourceLanguage = "en"
+      }
       function GenerateLink(url){return "<a href=\"" + url + "\">"+url+"</a>"}
       indexPageMiddle += "<tr><td>" + comic.title + "</td><td>atom</td><td>all</td><td>" + GenerateLink("https://rss.croppy.duckdns.org/"+comic.seriesNum +"-atom.xml") + "</td></tr>"
       indexPageMiddle += "<tr><td>" + comic.title + "</td><td>atom</td><td>just old</td><td>" + GenerateLink("https://rss.croppy.duckdns.org/"+comic.seriesNum +"-old-atom.xml") + "</td></tr>"

@@ -15,6 +15,7 @@ Init the `comics` collection in database `rss-webtoons` with the following rows
 {_id: "117474", typePrefix: "c_", title: "I wish I were you", seriesNum: "117474", link: "https://www.webtoons.com/en/challenge/i-wish-i-were-you/list?title_no=117474"}
 {_id: "303991", typePrefix: "c_", title: "Draigon", seriesNum: "303991", link: "https://www.webtoons.com/en/challenge/draigon/list?title_no=303991"}
 {_id: "212675", typePrefix: "c_", title: "Lamp-chan", seriesNum: "212675", link: "https://www.webtoons.com/en/challenge/lamp-chan/list?title_no=212675"}
+{_id: "500116", typePrefix: "c_", title: "I wish I were you (spanish)", seriesNum: "500116", link: "https://www.webtoons.com/es/challenge/desearía-ser-tú/list?title_no=500116", sourceLanguage: "es", subscriptionKey: "XXXXXXXXXXXXX"}
 ```
 
 
@@ -38,3 +39,9 @@ docker-compose run --rm rss-webtoons-gen node genRss.js
 docker-compose build rss-webtoons-gen
 ```
 
+# Translation
+Currently the translator uses azure cognative services, and is bound to eastus.
+
+Add `sourceLanguage: "es", subscriptionKey: "XXXXXXXXXXXXX"` in your insert
+
+see https://docs.microsoft.com/en-us/azure/cognitive-services/translator/quickstart-translator?tabs=nodejs for setup
