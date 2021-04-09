@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",
-    "cheerio": "^1.0.0-rc.5",
+    "cheerio": "^1.0.0-rc.6",
     "feed": "^4.2.1",
     "mongodb": "^3.6.3",
     "node-fetch": "^2.6.1",
