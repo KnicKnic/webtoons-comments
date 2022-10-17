@@ -9,7 +9,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^1.1.3",
     "cheerio": "^1.0.0-rc.10",
     "feed": "^4.2.2",
     "mongodb": "^4.0.1",
